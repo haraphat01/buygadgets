@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus, Zap } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
 import { AddToCartButton } from "@/components/storefront/add-to-cart-button";
+import { BuyNowButton } from "@/components/storefront/buy-now-button";
 import { CompareButton } from "@/components/storefront/compare-button";
 import { WishlistButton } from "@/components/storefront/wishlist-button";
 import { Button } from "@/components/ui/button";
@@ -78,10 +79,13 @@ export function ProductPurchasePanel({
           disabled={outOfStock}
           className="flex-1 sm:flex-none"
         />
-        <Button variant="secondary" disabled className="flex-1 sm:flex-none" title="Buy Now (coming soon)">
-          <Zap className="size-4" />
-          Buy Now
-        </Button>
+        <BuyNowButton
+          productId={productId}
+          variantId={variantId ?? null}
+          quantity={quantity}
+          disabled={outOfStock}
+          className="flex-1 sm:flex-none"
+        />
         <WishlistButton productId={productId} initialIsWishlisted={isWishlisted} />
         <CompareButton productId={productId} initialIsComparing={isComparing} />
       </div>

@@ -24,6 +24,7 @@ export function ProductGallery({
             alt={active.altText ?? productName}
             fill
             priority
+            sizes="(min-width: 768px) 50vw, 100vw"
             className="object-cover"
           />
         ) : null}
@@ -44,6 +45,7 @@ export function ProductGallery({
                 src={image.url}
                 alt={image.altText ?? productName}
                 fill
+                sizes="64px"
                 className="object-cover"
               />
             </button>

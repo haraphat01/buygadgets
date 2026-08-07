@@ -33,7 +33,14 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
   const banner = banners[index];
   const image = (
     <div className="relative aspect-[21/9] w-full overflow-hidden rounded-xl bg-muted sm:aspect-[3/1]">
-      <Image src={banner.imageUrl} alt={banner.title} fill priority className="object-cover" />
+      <Image
+        src={banner.imageUrl}
+        alt={banner.title}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
       <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/50 to-transparent p-4 sm:p-8">
         <p className="text-lg font-semibold text-white sm:text-2xl">{banner.title}</p>
       </div>

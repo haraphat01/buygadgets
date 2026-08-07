@@ -12,13 +12,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://buygadgets.tech";
+const siteName = "BuyGadgets";
+const siteDescription =
+  "Shop the latest smartphones, tablets, gadgets and mobile accessories at BuyGadgets.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "BuyGadgets",
-    template: "%s | BuyGadgets",
+    default: siteName,
+    template: `%s | ${siteName}`,
   },
-  description:
-    "Shop the latest smartphones, tablets, gadgets and mobile accessories at BuyGadgets.",
+  description: siteDescription,
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName,
+    title: siteName,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

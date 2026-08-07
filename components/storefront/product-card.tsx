@@ -17,6 +17,7 @@ export function ProductCard({ product }: { product: StorefrontProduct }) {
               src={product.images[0].url}
               alt={product.name}
               fill
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
               className="object-cover"
             />
           ) : null}

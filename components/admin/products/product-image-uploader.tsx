@@ -56,6 +56,7 @@ export function ProductImageUploader({
               src={image.url}
               alt={image.altText ?? ""}
               fill
+              sizes="(min-width: 1024px) 16vw, (min-width: 640px) 25vw, 50vw"
               className="object-cover"
             />
             <Button
