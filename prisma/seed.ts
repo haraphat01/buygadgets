@@ -23,7 +23,11 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL });
+// Uses the pooled DATABASE_URL (port 6543), not DIRECT_URL (port 5432) —
+// this script only runs simple upserts, not schema migrations, so it
+// doesn't need the direct/session connection. Some networks block
+// outbound 5432 while leaving the pooled port open.
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function findExistingAuthUser(targetEmail: string) {
