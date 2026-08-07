@@ -22,7 +22,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -32,9 +31,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { NavUser } from "@/components/admin/nav-user";
-import { NotificationBell } from "@/components/admin/notification-bell";
-import type { AdminNotification } from "@/services/notifications";
 
 const navItems: {
   title: string;
@@ -57,19 +53,7 @@ const navItems: {
   { title: "Users", href: "/admin/users", icon: UserCog },
 ];
 
-export function AppSidebar({
-  name,
-  email,
-  role,
-  notifications,
-  unreadCount,
-}: {
-  name: string;
-  email: string | null | undefined;
-  role: string;
-  notifications: AdminNotification[];
-  unreadCount: number;
-}) {
+export function AppSidebar() {
   const pathname = usePathname();
 
   return (
@@ -119,14 +103,6 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
-          <NotificationBell notifications={notifications} unreadCount={unreadCount} />
-          <div className="min-w-0 flex-1">
-            <NavUser name={name} email={email} role={role} />
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }

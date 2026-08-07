@@ -32,13 +32,7 @@ export default async function AdminDashboardLayout({
   return (
     <SidebarProvider>
       <div className="contents print:hidden">
-        <AppSidebar
-          name={name}
-          email={session.email}
-          role={session.adminUser.role}
-          notifications={notifications}
-          unreadCount={unreadCount}
-        />
+        <AppSidebar />
       </div>
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 print:hidden">
