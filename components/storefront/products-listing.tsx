@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
+import { searchStorefrontProducts } from "@/actions/storefront-products";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +19,15 @@ import { PRODUCT_CONDITIONS } from "@/lib/validations/product";
 import type { ProductSort } from "@/services/storefront-products";
 import type { StorefrontProduct } from "@/services/storefront";
 import type { PaginatedResult } from "@/types";
+
+type Filters = {
+  q: string;
+  categorySlug: string;
+  brandSlug: string;
+  condition: string;
+  sort: ProductSort;
+  page: number;
+};
 
 export function ProductsListing({
   result,
@@ -37,27 +48,59 @@ export function ProductsListing({
   condition: string;
   sort: ProductSort;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [search, setSearch] = useState(q);
-
-  function updateParams(patch: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(patch)) {
-      if (value) params.set(key, value);
-      else params.delete(key);
-    }
-    router.push(`${pathname}?${params.toString()}`);
-  }
+  const [filters, setFilters] = useState<Filters>({
+    q,
+    categorySlug,
+    brandSlug,
+    condition,
+    sort,
+    page: result.page,
+  });
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (search !== q) updateParams({ q: search || undefined, page: undefined });
+      setFilters((f) => (f.q === search ? f : { ...f, q: search, page: 1 }));
     }, 300);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
+
+  // Keeps the URL shareable/bookmarkable without router.push — a Next.js
+  // navigation here would re-trigger the server render this page already
+  // did once, duplicating the fetch the query below owns.
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.q) params.set("q", filters.q);
+    if (filters.categorySlug) params.set("category", filters.categorySlug);
+    if (filters.brandSlug) params.set("brand", filters.brandSlug);
+    if (filters.condition) params.set("condition", filters.condition);
+    if (filters.sort !== "newest") params.set("sort", filters.sort);
+    if (filters.page > 1) params.set("page", String(filters.page));
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+  }, [filters, pathname]);
+
+  const isInitialFilters =
+    filters.q === q &&
+    filters.categorySlug === categorySlug &&
+    filters.brandSlug === brandSlug &&
+    filters.condition === condition &&
+    filters.sort === sort &&
+    filters.page === result.page;
+
+  const { data } = useQuery({
+    queryKey: ["storefront-products", filters],
+    queryFn: () => searchStorefrontProducts(filters),
+    placeholderData: keepPreviousData,
+    initialData: isInitialFilters ? result : undefined,
+  });
+
+  const products = data ?? result;
+
+  function updateFilter(patch: Partial<Omit<Filters, "page">>) {
+    setFilters((f) => ({ ...f, ...patch, page: 1 }));
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -71,10 +114,8 @@ export function ProductsListing({
           className="max-w-xs"
         />
         <Select
-          value={categorySlug || "all"}
-          onValueChange={(v) =>
-            updateParams({ category: v === "all" ? undefined : (v as string), page: undefined })
-          }
+          value={filters.categorySlug || "all"}
+          onValueChange={(v) => updateFilter({ categorySlug: v === "all" ? "" : (v as string) })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Category" />
@@ -89,10 +130,8 @@ export function ProductsListing({
           </SelectContent>
         </Select>
         <Select
-          value={brandSlug || "all"}
-          onValueChange={(v) =>
-            updateParams({ brand: v === "all" ? undefined : (v as string), page: undefined })
-          }
+          value={filters.brandSlug || "all"}
+          onValueChange={(v) => updateFilter({ brandSlug: v === "all" ? "" : (v as string) })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Brand" />
@@ -107,10 +146,8 @@ export function ProductsListing({
           </SelectContent>
         </Select>
         <Select
-          value={condition || "all"}
-          onValueChange={(v) =>
-            updateParams({ condition: v === "all" ? undefined : (v as string), page: undefined })
-          }
+          value={filters.condition || "all"}
+          onValueChange={(v) => updateFilter({ condition: v === "all" ? "" : (v as string) })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Condition" />
@@ -124,7 +161,10 @@ export function ProductsListing({
             ))}
           </SelectContent>
         </Select>
-        <Select value={sort} onValueChange={(v) => updateParams({ sort: v as string, page: undefined })}>
+        <Select
+          value={filters.sort}
+          onValueChange={(v) => updateFilter({ sort: v as ProductSort })}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
@@ -137,37 +177,37 @@ export function ProductsListing({
         </Select>
       </div>
 
-      {result.items.length === 0 ? (
+      {products.items.length === 0 ? (
         <p className="py-16 text-center text-muted-foreground">
           No products match your filters.
         </p>
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {result.items.map((product) => (
+          {products.items.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
 
-      {result.totalPages > 1 ? (
+      {products.totalPages > 1 ? (
         <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
           <span>
-            Page {result.page} of {result.totalPages}
+            Page {products.page} of {products.totalPages}
           </span>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
-              disabled={result.page <= 1}
-              onClick={() => updateParams({ page: String(result.page - 1) })}
+              disabled={products.page <= 1}
+              onClick={() => setFilters((f) => ({ ...f, page: f.page - 1 }))}
             >
               Previous
             </Button>
             <Button
               variant="outline"
               size="sm"
-              disabled={result.page >= result.totalPages}
-              onClick={() => updateParams({ page: String(result.page + 1) })}
+              disabled={products.page >= products.totalPages}
+              onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
             >
               Next
             </Button>
