@@ -72,10 +72,23 @@ export function CheckoutForm({
   const deliveryFee = selectedDelivery ? Number(selectedDelivery.fee) : 0;
   const grandTotal = Math.max(0, cart.subtotal - cart.discount) + deliveryFee;
 
+  // Hidden pending partnership approval from Credit Direct and Klump. Flip
+  // this back to true once both partners confirm — the rest of the
+  // integration (settings, dialog, order flow) is untouched.
+  const CREDIT_KLUMP_PARTNERSHIP_APPROVED = false;
+
   const paymentOptions: { value: CheckoutValues["paymentMethod"]; label: string; available: boolean }[] = [
     { value: "PAYSTACK", label: "Pay with Paystack", available: true },
-    { value: "CREDIT_DIRECT", label: "Credit Direct (Buy Now, Pay Later)", available: paymentSettings.creditDirect.enabled },
-    { value: "KLUMP", label: "Klump", available: paymentSettings.klump.enabled },
+    {
+      value: "CREDIT_DIRECT",
+      label: "Credit Direct (Buy Now, Pay Later)",
+      available: CREDIT_KLUMP_PARTNERSHIP_APPROVED && paymentSettings.creditDirect.enabled,
+    },
+    {
+      value: "KLUMP",
+      label: "Klump",
+      available: CREDIT_KLUMP_PARTNERSHIP_APPROVED && paymentSettings.klump.enabled,
+    },
   ];
 
   function onSubmit(values: CheckoutValues) {

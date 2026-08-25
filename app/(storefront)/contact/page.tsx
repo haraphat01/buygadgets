@@ -29,10 +29,10 @@ export default function ContactPage() {
           <div>
             <p className="text-sm font-medium">Phone</p>
             <a
-              href="tel:08101061206"
+              href="tel:09158648413"
               className="mt-1 block text-sm text-muted-foreground hover:text-foreground hover:underline"
             >
-              0810 106 1206
+              0915 864 8413
             </a>
           </div>
         </div>
