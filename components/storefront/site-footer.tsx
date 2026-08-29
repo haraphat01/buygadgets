@@ -55,6 +55,12 @@ export function SiteFooter() {
                 0915 864 8413
               </a>
             </li>
+            <li className="flex items-center gap-2">
+              <Phone className="size-4 shrink-0" />
+              <a href="tel:07120142878" className="hover:text-foreground hover:underline">
+                0712 014 2878
+              </a>
+            </li>
           </ul>
         </div>
         {linkColumns.map((column) => (

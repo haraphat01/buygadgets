@@ -34,6 +34,12 @@ export default function ContactPage() {
             >
               0915 864 8413
             </a>
+            <a
+              href="tel:07120142878"
+              className="mt-1 block text-sm text-muted-foreground hover:text-foreground hover:underline"
+            >
+              0712 014 2878
+            </a>
           </div>
         </div>
       </div>
